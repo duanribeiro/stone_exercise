@@ -1,13 +1,10 @@
-import uuid
-from pprint import pprint as pp
+from flask import Flask, jsonify, request
+import docker
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-import docker
-
 
 DEBUG = True
 CONTAINERS = []
-
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -19,15 +16,26 @@ def remove_container(container_id):
         if c['id'] == container_id:
             CONTAINERS.remove(c)
 
-            return True
-
-    return False
 
 def start_container(container_id):
     container = client.containers.get(container_id)
     container.start
+    i = 0
+    for c in CONTAINERS:
+        if c['id'] == container_id:
+            CONTAINERS[i]['status_container'] = 'Running!'
+        else:
+            i += 1
 
-    return True
+def stop_container(container_id):
+    container = client.containers.get(container_id)
+    container.stop
+    i = 0
+    for c in CONTAINERS:
+        if c['id'] == container_id:
+            CONTAINERS[i]['status_container'] = 'Stopped!'
+        else:
+            i += 1
 
 @app.route('/containers', methods=['GET', 'POST'])
 def all_containers():
@@ -52,7 +60,8 @@ def all_containers():
 
                 CONTAINERS.append({
                     'id': container.short_id,
-                    'image': container.image.tags[0]
+                    'image': container.image.tags[0],
+                    'status_container': 'Running!'
                 })
                 response_object['containers'] = CONTAINERS
 
@@ -68,8 +77,6 @@ def all_containers():
         return jsonify(response_object)
 
 
-
-
 @app.route('/containers/<container_id>', methods=['POST', 'PUT', 'DELETE'])
 def single_book(container_id):
     response_object = {'status': 'success'}
@@ -82,12 +89,9 @@ def single_book(container_id):
     elif request.method == 'DELETE':
         remove_container(container_id)
 
-        response_object['message'] = 'Book removed!'
     return jsonify(response_object)
 
 
 if __name__ == '__main__':
-    # client = docker.DockerClient()
-    # client = docker.from_env()
     client = docker.client.from_env()
     app.run()

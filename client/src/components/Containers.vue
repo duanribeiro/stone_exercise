@@ -12,6 +12,7 @@
             <tr>
               <th scope="col">Container ID</th>
               <th scope="col">Image</th>
+              <th scope="col">Status Container</th>
               <th scope="col">Options</th>
               <th></th>
             </tr>
@@ -20,27 +21,27 @@
             <tr v-for="(container, index) in containers" :key="index">
               <td>{{ container.id }}</td>
               <td>{{ container.image }}</td>
+               <td>{{ container.status_container }}</td>
 
               <td>
                 <div class="btn-group" role="group">
                   <button
                           type="button"
                           class="btn btn-warning btn-sm"
-                          v-b-modal.book-update-modal
-                          @click="editBook(book)">
+                          @click="onStartContainer(container)">
                       Start
                   </button>
                    <button
                           type="button"
                           class="btn btn-warning btn-sm"
                           v-b-modal.book-update-modal
-                          @click="editBook(book)">
+                          @click="onStopContainer(container)">
                       Stop
                   </button>
                   <button
                           type="button"
                           class="btn btn-danger btn-sm"
-                          @click="onDeleteBook(container)">
+                          @click="onDeleteContainer(container)">
                       Remove
                   </button>
                 </div>
@@ -70,42 +71,7 @@
         </b-button-group>
       </b-form>
     </b-modal>
-    <b-modal ref="editBookModal"
-            id="book-update-modal"
-            title="Update"
-            hide-footer>
-      <b-form @submit="onSubmitUpdate" @reset="onResetUpdate" class="w-100">
-      <b-form-group id="form-title-edit-group"
-                    label="Title:"
-                    label-for="form-title-edit-input">
-          <b-form-input id="form-title-edit-input"
-                        type="text"
-                        v-model="editForm.title"
-                        required
-                        placeholder="Enter title">
-          </b-form-input>
-        </b-form-group>
-        <b-form-group id="form-author-edit-group"
-                      label="Author:"
-                      label-for="form-author-edit-input">
-            <b-form-input id="form-author-edit-input"
-                          type="text"
-                          v-model="editForm.author"
-                          required
-                          placeholder="Enter author">
-            </b-form-input>
-          </b-form-group>
-        <b-form-group id="form-read-edit-group">
-          <b-form-checkbox-group v-model="editForm.read" id="form-checks">
-            <b-form-checkbox value="true">Read?</b-form-checkbox>
-          </b-form-checkbox-group>
-        </b-form-group>
-        <b-button-group>
-          <b-button type="submit" variant="primary">Update</b-button>
-          <b-button type="reset" variant="danger">Cancel</b-button>
-        </b-button-group>
-      </b-form>
-    </b-modal>
+
   </div>
 </template>
 <script>
@@ -116,17 +82,13 @@ export default {
     return {
       containers: [],
       addContainerForm: {
+        id: '',
         image: '',
+        status_container: ''
       },
       status: '',
       message: '',
       showMessage: false,
-      editForm: {
-        id: '',
-        title: '',
-        author: '',
-        read: [],
-      },
     };
   },
   components: {
@@ -165,13 +127,9 @@ export default {
         });
     },
     initForm() {
-      this.addContainerForm.title = '';
-      this.addContainerForm.author = '';
-      this.addContainerForm.read = [];
-      this.editForm.id = '';
-      this.editForm.title = '';
-      this.editForm.author = '';
-      this.editForm.read = [];
+      this.addContainerForm.image = '';
+      this.addContainerForm.id = '';
+      this.addContainerForm.status_container = '';
     },
     onSubmit(evt) {
       evt.preventDefault();
@@ -188,45 +146,17 @@ export default {
       this.$refs.addContainerModal.hide();
       this.initForm();
     },
-
-    onSubmitUpdate(evt) {
-      evt.preventDefault();
-      this.$refs.editBookModal.hide();
-      let read = false;
-      if (this.editForm.read[0]) read = true;
-      const payload = {
-        title: this.editForm.title,
-        author: this.editForm.author,
-        read,
-      };
-      this.updateBook(payload, this.editForm.id);
-    },
-    updateBook(payload, containerID) {
-      const path = `http://localhost:5000/containers/${containerID}`;
-      axios.put(path, payload)
-        .then(() => {
-          this.getContainers();
-          this.message = 'Book updated!';
-          this.showMessage = true;
-        })
-        .catch((error) => {
-          // eslint-disable-next-line
-          console.error(error);
-          this.getContainers();
-        });
-    },
     onResetUpdate(evt) {
       evt.preventDefault();
-      this.$refs.editBookModal.hide();
       this.initForm();
-      this.getContainers(); // why?
+      this.getContainers();
     },
     removeContainer(containerID) {
       const path = `http://localhost:5000/containers/${containerID}`;
       axios.delete(path)
         .then(() => {
           this.getContainers();
-          this.message = 'Book removed!';
+          this.message = 'Container removed!';
           this.showMessage = true;
         })
         .catch((error) => {
@@ -234,9 +164,44 @@ export default {
           this.getContainers();
         });
     },
-    onDeleteBook(container) {
+    onDeleteContainer(container) {
       this.removeContainer(container.id);
     },
+    startContainer(containerID) {
+      const path = `http://localhost:5000/containers/${containerID}`;
+      axios.post(path)
+        .then(() => {
+          this.getContainers();
+          this.message = 'Container Started!';
+          this.showMessage = true;
+        })
+        .catch((error) => {
+          console.error(error);
+          this.getContainers();
+        });
+    },
+    onStartContainer(container) {
+      this.startContainer(container.id);
+    },
+    stopContainer(containerID) {
+      const path = `http://localhost:5000/containers/${containerID}`;
+      axios.put(path)
+        .then(() => {
+          this.getContainers();
+          this.message = 'Container Stoped!';
+          this.showMessage = true;
+        })
+        .catch((error) => {
+          console.error(error);
+          this.getContainers();
+        });
+    },
+    onStopContainer(container) {
+      this.stopContainer(container.id);
+      this.initForm();
+    },
+
+
   },
   created() {
     this.getContainers();
