@@ -23,9 +23,9 @@
 
     Navigate to [http://localhost:8080](http://localhost:8080)
     
- *The most importants files of project are:*
+ **The most importants files of project are:**
  
-client: stone_exercise/client/src/components/Containers.vue <br>
-server: stone_exercise/server/app.py
+**client**: stone_exercise/client/src/components/Containers.vue <br>
+**server**: stone_exercise/server/app.py
 
 ![alt text](screenshot.png)
