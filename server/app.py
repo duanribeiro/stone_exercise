@@ -12,6 +12,8 @@ CORS(app, resources={r'/*': {'origins': '*'}})
 
 
 def remove_container(container_id):
+    container = client.containers.get(container_id)
+    container.remove
     for c in CONTAINERS:
         if c['id'] == container_id:
             CONTAINERS.remove(c)
