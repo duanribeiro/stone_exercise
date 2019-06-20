@@ -34,7 +34,6 @@
                    <button
                           type="button"
                           class="btn btn-warning btn-sm"
-                          v-b-modal.book-update-modal
                           @click="onStopContainer(container)">
                       Stop
                   </button>
