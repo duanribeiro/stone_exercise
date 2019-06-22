@@ -1,4 +1,5 @@
 # Stone Python Developer Challenge
+The full exercicise can be found here: https://github.com/stone-payments/python-dev-challenge<br>
 
 
 1. Run the server-side Flask app in one terminal window:
