@@ -1,5 +1,6 @@
 # Stone Python Developer Challenge
 The full exercicise can be found here: https://github.com/stone-payments/python-dev-challenge<br>
+![alt text](screenshot.png)
 
 
 1. Run the server-side Flask app in one terminal window:
@@ -29,4 +30,3 @@ The full exercicise can be found here: https://github.com/stone-payments/python-
 **client**: stone_exercise/client/src/components/Containers.vue <br>
 **server**: stone_exercise/server/app.py
 
-![alt text](screenshot.png)
